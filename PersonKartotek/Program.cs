@@ -63,6 +63,8 @@ namespace PersonKartotek
             _newaddress.Persons = new List<Person>();
             _newaddress.Persons.Add(_newPerson);
             entry.AddPerson(ref _newPerson);
+            var newRelations = new PersonAddressRelations() {PersonID = _newPerson.PersonID, AddressID = _newaddress.AddressID};
+            entry.AddPersonAddressRelation(ref newRelations);
 
             var _person = entry.GetPersonByName(ref _newPerson);
 
@@ -77,6 +79,15 @@ namespace PersonKartotek
                 Console.WriteLine("Personens Mellemnavn er: \t" + Persons.MiddleName);
                 Console.WriteLine("Personens Efternavn er: \t" + Persons.LastName);
                 Console.WriteLine("Kontakt typen for personen er \t" + Persons.ContactType);
+                for (int i = 0; i < Persons.AddressRelations.Count; i++)
+                {
+                    var addressRelation = Persons.AddressRelations.ElementAt(i);
+                    Console.WriteLine($"Adresse #{i+1} er:");
+                    Console.WriteLine($"{addressRelation.Address.RoadName}, {addressRelation.Address.HouseNumber}");
+                    Console.WriteLine($"{addressRelation.Address.AddressCity.PostalCode} {addressRelation.Address.AddressCity.City}");
+                }
+               
+                
                 //Console.WriteLine("Note om Personen \t" + Persons.Note);
             }
 

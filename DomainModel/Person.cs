@@ -14,7 +14,7 @@ namespace DomainModel
         public string LastName { get; set; }
         public string ContactType { get; set; }
         //public string Note { get; set; }
-        public virtual List<PersonAddressRelations> AddressRelations { get; set; } = new List<PersonAddressRelations>();
+        public virtual ICollection<PersonAddressRelations> AddressRelations { get; set; } = new List<PersonAddressRelations>();
         public ICollection<EmailAddr> EmailAddresses { get; set; }
         public ICollection<Phone> Phones { get; set; }
     }

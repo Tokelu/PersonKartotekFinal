@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Data.SqlClient;
+using System.Security.Cryptography.X509Certificates;
 using DomainModel;
 
 namespace Infrastructure
@@ -26,6 +27,7 @@ namespace Infrastructure
                 //AddressID = 0,
                 Phones = null,
                 EmailAddresses = null
+                
             };
         }
 
@@ -36,15 +38,106 @@ namespace Infrastructure
                 var con = new SqlConnection(
                     //Publish Database to get string.
                     //Tonni Surface Connectionstring - LocalDB
-                    @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=PersonKartotekDB;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=60;Encrypt=False;TrustServerCertificate=True");
+                    //
+                    //@"Data 
+                    //        Source=(localdb)\MSSQLLocalDB;
+                    //        Initial Catalog=PersonKartotekDB;
+                    //        Integrated Security=True;
+                    //        Persist Security Info=False;
+                    //        Pooling=False;
+                    //        MultipleActiveResultSets=False;
+                    //        Connect Timeout=60;
+                    //        Encrypt=False;
+                    //        TrustServerCertificate=True");
+
+
+                    //Connection to AU DB Server:
+                    //@"Data 
+                    //        Source=st-i4dab.uni.au.dk; 
+                    //        Initial Catalog=E18I4DABau543236;
+                    //        User ID=E18I4DABau543236;
+                    //        Password=E18I4DABau543236;
+                    //        Connect Timeout=30;
+                    //        Encrypt=False;
+                    //        TrustServerCertificate=True;
+                    //        ApplicationIntent=ReadWrite;
+                    //        MultiSubnetFailover=False");
+
+
+                    @"Data Source=st-i4dab.uni.au.dk; Initial Catalog=E18I4DABau543236;User ID=E18I4DABau543236;Password=E18I4DABau543236;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+
+
 
                 // Tonni Stationær Connectionstring til LocalDB
-                // @"Data Source = (localdb)\MSSQLLocalDB; Integrated Security = True; Persist Security Info = False; Pooling = False; MultipleActiveResultSets = False; Connect Timeout = 60; Encrypt = False; TrustServerCertificate = True");
+                //@"Data 
+                //        Source = (localdb)\MSSQLLocalDB; 
+                //        Integrated Security = True; 
+                //        Persist Security Info = False; 
+                //        Pooling = False; 
+                //        MultipleActiveResultSets = False; 
+                //        Connect Timeout = 60; 
+                //        Encrypt = False; 
+                //        TrustServerCertificate = True");
+
                 con.Open();
                 return con;
             }
         }
 
+
+        #region Person_Address Relations Tools
+
+        public void AddPersonAddressRelation(ref PersonAddressRelations personAddressRelations)
+        {
+            string insertStringParam = @"INSERT INTO PersonAddressRelations (PersonID, AddressID)
+                                                OUTPUT INSERTED.PersonID
+                                                VALUES(@PersonID, @AddressID";
+            using (SqlCommand cmd = new SqlCommand(insertStringParam, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@PersonID", personAddressRelations.PersonID);
+                cmd.Parameters.AddWithValue("@AddressID", personAddressRelations.AddressID);
+            }
+        }
+
+
+        public void DeletePersonAddressRelation(ref PersonAddressRelations personAddressRelations)
+        {
+            string DeleteString = @"DELETE FROM PersonAddressRelation where (PersonID=@PersonID)";
+            using (SqlCommand cmd = new SqlCommand(DeleteString, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@PersonID", personAddressRelations.PersonID);
+                var count = cmd.ExecuteNonQuery();
+                personAddressRelations = null;
+            }
+        }
+
+        public List<PersonAddressRelations> GetAddressByPersonIDPersonAddressRelation(ref Person person)
+        {
+            string GetAddressByName = @"Select * FROM PersonAddressRelation WHERE (PersonID=@PersonID)";
+            using (SqlCommand cmd = new SqlCommand(GetAddressByName, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@PersonID", person.PersonID);
+                SqlDataReader rdr = null;
+                rdr = cmd.ExecuteReader();
+                var list = new List<PersonAddressRelations>();
+                while (rdr.Read())
+                {
+                    PersonAddressRelations personAddressRelations = new PersonAddressRelations();
+                    personAddressRelations.PersonID = (int)rdr["PersonID"];
+                    personAddressRelations.AddressID= (int)rdr["AddressID"];
+
+                    personAddressRelations.Address = GetAddressByID(personAddressRelations.AddressID);
+                    personAddressRelations.Person = person;
+
+
+                    list.Add(personAddressRelations);
+                }
+
+                return list;
+            }
+        }
+
+        #endregion
 
         #region Person Tools
 
@@ -112,7 +205,7 @@ namespace Infrastructure
                     //NewContact.Note = (string)rdr["Note"];
                     //NewContact.EmailAddresses = (List<EmailAddr>)rdr["EmailAddress"];
                     //NewContact.Phones = (List<Phone>)rdr["PhoneNumber"];
-
+                    NewContact.AddressRelations = GetAddressByPersonIDPersonAddressRelation(ref NewContact);
                     person = NewContact;
                 }
             }
@@ -190,6 +283,7 @@ namespace Infrastructure
                     NewContact.ContactType = (string)rdr["ContactType"];
                     //NewContact.Note = (string)rdr["Note"];
 
+
                     list.Add(person);
                 }
                 return list;
@@ -217,20 +311,20 @@ namespace Infrastructure
 
         #region Address Tools
 
-        public  List<Address> GetPersonsAddresses(ref Person person)
+        public Address GetAddressByID(int AddressID)
         {
             //Ved ikke om nedenstående kan gøres.... (ift. WHERE Person AND AddressType)
             //string ListAddresses = @"SELECT * FROM [Address] WHERE ([Person] = @PersonID) AND ([IsRegisteredAddress = @IsRegisteredAddress])";
-            string ListAddresses = @"SELECT * FROM [Address] WHERE ([Person] = @PersonID) AND ([IsRegisteredAddress = @IsRegisteredAddress])";
-            using (var cmd = new SqlCommand(ListAddresses, OpenConnection))
+            string AddressQuery = @"SELECT * FROM [Address] WHERE ( AddressID = @AddressID )";
+            using (var cmd = new SqlCommand(AddressQuery, OpenConnection))
             {
                 SqlDataReader rdr = null;
-                cmd.Parameters.AddWithValue("@PersonID", person.PersonID);
+                cmd.Parameters.AddWithValue("@AddressID", AddressID);
                 rdr = cmd.ExecuteReader();
-                List<Address> AddressList = new List<Address>();
+                
                 Address PrimaryAddr = null;
 
-                while (rdr.Read())
+                if (rdr.Read())
                 {
                     PrimaryAddr = new Address();
                     PrimaryAddr.AddressID = (int)rdr["AddressID"];
@@ -239,9 +333,8 @@ namespace Infrastructure
                     PrimaryAddr.Story = (string)rdr["Story"];
                     PrimaryAddr.IsRegisteredAddress = (string)rdr["IsRegisteredAddress"];
                     PrimaryAddr.AddressType = (string)rdr["AddressType"];
-                    AddressList.Add(PrimaryAddr);
                 }
-                return AddressList;
+                return PrimaryAddr;
             }
         }
 
