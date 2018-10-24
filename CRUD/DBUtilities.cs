@@ -36,35 +36,26 @@ namespace Infrastructure
             get
             {
                 var con = new SqlConnection(
-                    //Publish Database to get string.
-                    //Tonni Surface Connectionstring - LocalDB
-                    //
-                    //@"Data 
-                    //        Source=(localdb)\MSSQLLocalDB;
-                    //        Initial Catalog=PersonKartotekDB;
-                    //        Integrated Security=True;
-                    //        Persist Security Info=False;
-                    //        Pooling=False;
-                    //        MultipleActiveResultSets=False;
-                    //        Connect Timeout=60;
-                    //        Encrypt=False;
-                    //        TrustServerCertificate=True");
+                //Publish Database to get string.
+                //Tonni Surface Connectionstring - LocalDB
+                //
+                @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=PersonKartotekDB;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=60;Encrypt=False;TrustServerCertificate=False");
 
 
-                    //Connection to AU DB Server:
-                    //@"Data 
-                    //        Source=st-i4dab.uni.au.dk; 
-                    //        Initial Catalog=E18I4DABau543236;
-                    //        User ID=E18I4DABau543236;
-                    //        Password=E18I4DABau543236;
-                    //        Connect Timeout=30;
-                    //        Encrypt=False;
-                    //        TrustServerCertificate=True;
-                    //        ApplicationIntent=ReadWrite;
-                    //        MultiSubnetFailover=False");
+                //Connection to AU DB Server:
+                //@"Data 
+                //        Source=st-i4dab.uni.au.dk; 
+                //        Initial Catalog=E18I4DABau543236;
+                //        User ID=E18I4DABau543236;
+                //        Password=E18I4DABau543236;
+                //        Connect Timeout=30;
+                //        Encrypt=False;
+                //        TrustServerCertificate=True;
+                //        ApplicationIntent=ReadWrite;
+                //        MultiSubnetFailover=False");
 
 
-                    @"Data Source=st-i4dab.uni.au.dk; Initial Catalog=E18I4DABau543236;User ID=E18I4DABau543236;Password=E18I4DABau543236;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+                //@"Data Source=st-i4dab.uni.au.dk; Initial Catalog=E18I4DABau543236;User ID=E18I4DABau543236;Password=E18I4DABau543236;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
 
 
 
@@ -90,19 +81,19 @@ namespace Infrastructure
         public void AddPersonAddressRelation(ref PersonAddressRelations personAddressRelations)
         {
             string insertStringParam = @"INSERT INTO PersonAddressRelations (PersonID, AddressID)
-                                                OUTPUT INSERTED.PersonID
-                                                VALUES(@PersonID, @AddressID";
+                                                VALUES(@PersonID, @AddressID)";
             using (SqlCommand cmd = new SqlCommand(insertStringParam, OpenConnection))
             {
                 cmd.Parameters.AddWithValue("@PersonID", personAddressRelations.PersonID);
                 cmd.Parameters.AddWithValue("@AddressID", personAddressRelations.AddressID);
+                var count = cmd.ExecuteNonQuery();
             }
         }
 
 
         public void DeletePersonAddressRelation(ref PersonAddressRelations personAddressRelations)
         {
-            string DeleteString = @"DELETE FROM PersonAddressRelation where (PersonID=@PersonID)";
+            string DeleteString = @"DELETE FROM PersonAddressRelations WHERE (PersonID=@PersonID)";
             using (SqlCommand cmd = new SqlCommand(DeleteString, OpenConnection))
             {
                 cmd.Parameters.AddWithValue("@PersonID", personAddressRelations.PersonID);
@@ -113,7 +104,7 @@ namespace Infrastructure
 
         public List<PersonAddressRelations> GetAddressByPersonIDPersonAddressRelation(ref Person person)
         {
-            string GetAddressByName = @"Select * FROM PersonAddressRelation WHERE (PersonID=@PersonID)";
+            string GetAddressByName = @"SELECT * FROM PersonAddressRelations WHERE (PersonID=@PersonID)";
             using (SqlCommand cmd = new SqlCommand(GetAddressByName, OpenConnection))
             {
                 cmd.Parameters.AddWithValue("@PersonID", person.PersonID);
@@ -292,23 +283,7 @@ namespace Infrastructure
 
         #endregion
 
-
-        public void AddCity(ref AddressCity city)
-        {
-            string insertStringParam = @"INSERT INTO [City] (CityName, PostalCode)
-                                        OUTPUT INSERTED.CityID
-                                        VALUES (@City, @PostalCode)";
-
-            using (var cmd = new SqlCommand(insertStringParam, OpenConnection))
-            {
-                cmd.Parameters.AddWithValue("@City", city.City);
-                cmd.Parameters.AddWithValue("@PostalCode", city.PostalCode);
-                city.CityID = (int)cmd.ExecuteScalar();
-            }
-        }
-
-
-
+        
         #region Address Tools
 
         public Address GetAddressByID(int AddressID)
@@ -382,6 +357,20 @@ namespace Infrastructure
                 cmd.Parameters.AddWithValue("@AddressID", address.AddressID);
                 var count = cmd.ExecuteNonQuery();
                 address = null;
+            }
+        }
+
+        public void AddCity(ref AddressCity city)
+        {
+            string insertStringParam = @"INSERT INTO [City] (CityName, PostalCode)
+                                        OUTPUT INSERTED.CityID
+                                        VALUES (@City, @PostalCode)";
+
+            using (var cmd = new SqlCommand(insertStringParam, OpenConnection))
+            {
+                cmd.Parameters.AddWithValue("@City", city.City);
+                cmd.Parameters.AddWithValue("@PostalCode", city.PostalCode);
+                city.CityID = (int)cmd.ExecuteScalar();
             }
         }
 

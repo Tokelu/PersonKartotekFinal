@@ -22,25 +22,25 @@ namespace PersonKartotek
                               "\n . " +
                               "\n" +
                               "Starting Database\n");
-
-
-
-
-
+            
             DBUtilities entry = new DBUtilities();
 
             AddressCity _newcity = new AddressCity()
             {
-                City = "Aarhus",
-                PostalCode = "8000"
+                City = "Viby J",
+                PostalCode = "8260"
             };
             entry.AddCity(ref _newcity);
 
+            
+            
+
+
             Address _newaddress = new Address()
             {
-                RoadName = "Vestergade",
-                HouseNumber = "22A",
-                Story = "",
+                RoadName = "østergade",
+                HouseNumber = "44",
+                Story = "3",
                 IsRegisteredAddress = "Primær",
                 AddressType = "Home",
                 CityID = _newcity.CityID
@@ -66,26 +66,38 @@ namespace PersonKartotek
             var newRelations = new PersonAddressRelations() {PersonID = _newPerson.PersonID, AddressID = _newaddress.AddressID};
             entry.AddPersonAddressRelation(ref newRelations);
 
-            var _person = entry.GetPersonByName(ref _newPerson);
+            //var _person = entry.GetPersonByName(ref _newPerson);
 
 
             var kartotek = new DBUtilities();
             var PersonsInDB = kartotek.GetAllThePersonS();
+            
 
             foreach (Person Persons in PersonsInDB)
             {
+                Console.WriteLine(" " );
                 Console.WriteLine("Personens ID: \t"+Persons.PersonID);
                 Console.WriteLine("Personens Fornavn er: \t" + Persons.FirstName);
                 Console.WriteLine("Personens Mellemnavn er: \t" + Persons.MiddleName);
                 Console.WriteLine("Personens Efternavn er: \t" + Persons.LastName);
                 Console.WriteLine("Kontakt typen for personen er \t" + Persons.ContactType);
-                for (int i = 0; i < Persons.AddressRelations.Count; i++)
+
+                foreach (var addressRelation in Persons.AddressRelations)
                 {
-                    var addressRelation = Persons.AddressRelations.ElementAt(i);
-                    Console.WriteLine($"Adresse #{i+1} er:");
+                    Console.WriteLine("Adressen er: ");
                     Console.WriteLine($"{addressRelation.Address.RoadName}, {addressRelation.Address.HouseNumber}");
                     Console.WriteLine($"{addressRelation.Address.AddressCity.PostalCode} {addressRelation.Address.AddressCity.City}");
+
                 }
+
+
+                //for (int i = 0; i < Persons.AddressRelations.Count; i++)
+                //{
+                //    var addressRelation = Persons.AddressRelations.ElementAt(i);
+                //    Console.WriteLine($"Adresse #{i+1} er:");
+                //    Console.WriteLine($"{addressRelation.Address.RoadName}, {addressRelation.Address.HouseNumber}");
+                //    Console.WriteLine($"{addressRelation.Address.AddressCity.PostalCode} {addressRelation.Address.AddressCity.City}");
+                //}
                
                 
                 //Console.WriteLine("Note om Personen \t" + Persons.Note);

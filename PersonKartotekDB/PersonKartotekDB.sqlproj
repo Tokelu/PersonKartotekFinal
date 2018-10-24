@@ -74,6 +74,7 @@
   <ItemGroup>
     <None Include="Scripts\Script1.sql" />
     <None Include="Scripts\Address.sql" />
+    <None Include="Scripts\Script2.sql" />
   </ItemGroup>
   <ItemGroup>
     <RefactorLog Include="PersonKartotekDB.refactorlog" />
