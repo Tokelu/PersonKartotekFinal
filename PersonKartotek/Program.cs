@@ -33,7 +33,6 @@ namespace PersonKartotek
             entry.AddCity(ref _newcity);
 
             
-            
 
 
             Address _newaddress = new Address()

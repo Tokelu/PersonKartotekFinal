@@ -38,6 +38,7 @@ namespace Infrastructure
                 var con = new SqlConnection(
                 //Publish Database to get string.
                 //Tonni Surface Connectionstring - LocalDB
+
                 //
                 @"Data Source=(localdb)\MSSQLLocalDB;Initial Catalog=PersonKartotekDB;Integrated Security=True;Persist Security Info=False;Pooling=False;MultipleActiveResultSets=False;Connect Timeout=60;Encrypt=False;TrustServerCertificate=False");
 
